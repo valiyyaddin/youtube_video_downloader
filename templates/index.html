@@ -28,10 +28,10 @@
     <div class="mb-4">
       <label class="block text-sm font-medium mb-2">Select Quality</label>
       <select id="quality" class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="1080p">1080p</option>
-        <option value="720p">720p</option>
-        <option value="480p">480p</option>
-        <option value="360p">360p</option>
+        <option value="1080">1080p</option>
+        <option value="720">720p</option>
+        <option value="480">480p</option>
+        <option value="360">360p</option>
       </select>
     </div>
 
@@ -72,11 +72,27 @@
         }
   
         const blob = await response.blob();
+
+        // Extract filename from Content-Disposition header
+        const contentDisposition = response.headers.get("Content-Disposition");
+        let filename = "video.mp4"; // Default fallback filename
+        
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+)"/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+        
+        // Create a download link and trigger the download
         const videoURL = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = videoURL;
-        a.download = "video.mp4";
+        a.download = filename; // Use the dynamically extracted filename here
         a.click();
+        
+        // Revoke the object URL to free memory
+        window.URL.revokeObjectURL(videoURL);
   
         statusDiv.innerHTML = `
           <span class="block mb-2">✅ Download completed!</span>
